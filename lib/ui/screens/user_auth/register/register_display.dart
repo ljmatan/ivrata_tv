@@ -119,6 +119,7 @@ class _RegisterDisplayState extends State<RegisterDisplay> {
                           height: 48,
                           label: 'Register',
                           onTap: () async {
+                            FocusScope.of(context).unfocus();
                             if (RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                                     .hasMatch(_emailTextController.text) &&
                                 _nameTextController.text.isNotEmpty &&
@@ -163,10 +164,11 @@ class _RegisterDisplayState extends State<RegisterDisplay> {
                                     if (widget.authSuccess != null)
                                       widget.authSuccess();
                                   }
-                                } else
+                                } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                           content: Text(decoded['error'])));
+                                }
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('$e')));
@@ -179,12 +181,13 @@ class _RegisterDisplayState extends State<RegisterDisplay> {
                               passwordsNoMatch
                                   ? _passwordFocusNode.requestFocus()
                                   : _nameFocusNode.requestFocus();
-                              showDialog(
+                              await showDialog(
                                   context: context,
                                   builder: (context) => AuthenticatingDialog(
                                       label: passwordsNoMatch
                                           ? 'Passwords don\'t match'
                                           : 'All fields must be submitted for registration'));
+                              _usernameFocusNode.requestFocus();
                             }
                           },
                         ),

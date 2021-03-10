@@ -108,19 +108,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        'assets/images/atv_logo.png',
-                        height: 30,
-                      ),
-                      const SizedBox(width: 14),
-                      Image.asset(
-                        'assets/images/ivrata_logo.png',
-                        height: 30,
-                      ),
-                    ],
+                  child: Image.asset(
+                    'assets/images/ivrata_logo.png',
+                    height: 30,
                   ),
                 ),
               ),

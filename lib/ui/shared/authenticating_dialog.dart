@@ -35,12 +35,11 @@ class AuthenticatingDialog extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     FocusableButton(
-                      autofocus: true,
                       width: 160,
                       height: 48,
                       label: 'TRY AGAIN',
                       color: Colors.black26,
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => Navigator.pop(context, false),
                     ),
                     const SizedBox(width: 16),
                     FocusableButton(

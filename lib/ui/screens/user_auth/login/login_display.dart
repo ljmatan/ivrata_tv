@@ -80,50 +80,61 @@ class _LoginDisplayState extends State<LoginDisplay> {
                           height: 48,
                           label: 'Login',
                           onTap: () async {
-                            showDialog(
-                                barrierDismissible: false,
-                                context: context,
-                                builder: (context) =>
-                                    Center(child: CircularProgressIndicator()));
-                            try {
-                              print('Sending login request');
-                              final response = await Auth.login(
-                                _usernameTextController.text,
-                                _passwordTextController.text,
-                              );
-                              print('Request finished');
-                              final decoded = jsonDecode(response.body);
-                              if (decoded['id'] != false) {
-                                print('Login successful');
-                                final data = UserData.fromJson(decoded);
-                                print('Saving user data');
-                                await User.setInstance(data, true);
-                                print('Saved user data');
-                                Navigator.pop(context);
-                                Navigator.pop(context, true);
-                                if (widget.authSuccess != null)
-                                  widget.authSuccess();
-                              } else {
-                                print('Login failed');
+                            FocusScope.of(context).unfocus();
+                            if (_usernameTextController.text.isEmpty ||
+                                _passwordTextController.text.isEmpty) {
+                              await showDialog(
+                                  context: context,
+                                  builder: (context) => AuthenticatingDialog(
+                                      label: 'Please check your input'));
+                              _usernameFocusNode.requestFocus();
+                            } else {
+                              showDialog(
+                                  barrierDismissible: false,
+                                  context: context,
+                                  builder: (context) => Center(
+                                      child: CircularProgressIndicator()));
+                              try {
+                                print('Sending login request');
+                                final response = await Auth.login(
+                                  _usernameTextController.text,
+                                  _passwordTextController.text,
+                                );
+                                print('Request finished');
+                                final decoded = jsonDecode(response.body);
+                                if (decoded['id'] != false) {
+                                  print('Login successful');
+                                  final data = UserData.fromJson(decoded);
+                                  print('Saving user data');
+                                  await User.setInstance(data, true);
+                                  print('Saved user data');
+                                  Navigator.pop(context);
+                                  Navigator.pop(context, true);
+                                  if (widget.authSuccess != null)
+                                    widget.authSuccess();
+                                } else {
+                                  print('Login failed');
+                                  Navigator.pop(context);
+                                  await showDialog(
+                                      context: context,
+                                      builder: (context) => AuthenticatingDialog(
+                                          label: decoded['error'] != null &&
+                                                  decoded['error']
+                                                          .runtimeType ==
+                                                      String
+                                              ? decoded['error']
+                                              : 'Login unsuccessful. Please check your details.'));
+                                }
+                              } catch (e) {
+                                print('Request failed');
                                 Navigator.pop(context);
                                 showDialog(
                                     context: context,
-                                    builder: (context) => AuthenticatingDialog(
-                                        label: decoded['error'] != null &&
-                                                decoded['error'].runtimeType ==
-                                                    String
-                                            ? decoded['error']
-                                            : 'Login unsuccessful. Please check your details.'));
+                                    builder: (context) =>
+                                        AuthenticatingDialog(label: '$e'));
                               }
-                            } catch (e) {
-                              print('Request failed');
-                              Navigator.pop(context);
-                              showDialog(
-                                  context: context,
-                                  builder: (context) =>
-                                      AuthenticatingDialog(label: '$e'));
+                              if (mounted) _usernameFocusNode.requestFocus();
                             }
-                            if (mounted) _usernameFocusNode.requestFocus();
                           },
                         ),
                       ),
