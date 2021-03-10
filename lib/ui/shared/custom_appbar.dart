@@ -4,15 +4,23 @@ import 'package:ivrata_tv/ui/shared/focusable_icon.dart';
 
 class CustomAppBar extends StatelessWidget {
   final String label;
-  final FocusNode closeButtonFocusNode, searchButtonFocusNode;
+  final FocusNode closeButtonFocusNode,
+      seriesFilterFocusNode,
+      moviesFilterFocusNode,
+      searchButtonFocusNode;
   final bool seriesFilter, searchButton;
-  final Function searchOnTap;
+  final Function seriesFilterOnTap, searchOnTap;
+  final int selectedSeriesOption;
 
   CustomAppBar({
     @required this.label,
     @required this.closeButtonFocusNode,
-    this.searchButtonFocusNode,
+    this.seriesFilterFocusNode,
+    this.moviesFilterFocusNode,
     this.seriesFilter: false,
+    this.seriesFilterOnTap,
+    this.selectedSeriesOption,
+    this.searchButtonFocusNode,
     this.searchButton: false,
     this.searchOnTap,
   });
@@ -49,6 +57,37 @@ class CustomAppBar extends StatelessWidget {
             ),
             Row(
               children: [
+                if (seriesFilter)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Row(
+                      children: [
+                        FocusableButton(
+                          width: 100,
+                          height: 36,
+                          focusNode: moviesFilterFocusNode,
+                          color: selectedSeriesOption == 0
+                              ? Colors.white
+                              : Colors.white54,
+                          label: 'Films',
+                          inverted: true,
+                          onTap: () => seriesFilterOnTap(0),
+                        ),
+                        const SizedBox(width: 10),
+                        FocusableButton(
+                          width: 100,
+                          height: 36,
+                          focusNode: seriesFilterFocusNode,
+                          color: selectedSeriesOption == 1
+                              ? Colors.white
+                              : Colors.white54,
+                          label: 'Series',
+                          inverted: true,
+                          onTap: () => seriesFilterOnTap(1),
+                        ),
+                      ],
+                    ),
+                  ),
                 if (searchButton)
                   Padding(
                     padding: const EdgeInsets.only(right: 10),

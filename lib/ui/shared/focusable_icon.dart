@@ -46,7 +46,7 @@ class _FocusableIconState extends State<FocusableIcon>
         child: Icon(
           widget.icon,
           size: 26,
-          color: Colors.white.withOpacity(_isFocused ? 1 : 0.6),
+          color: _isFocused ? Colors.red.shade300 : Colors.white,
         ),
       ),
       onTap: () => widget.onTap(),

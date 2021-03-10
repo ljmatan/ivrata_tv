@@ -32,20 +32,20 @@ class SettingsButtonState extends State<SettingsButton> {
     String label,
   ) {
     final String thisOption = widget.videoQualities
-        .singleWhere((e) => e.endsWith(filenameEndsWith), orElse: () => null);
+        .firstWhere((e) => e.contains(filenameEndsWith), orElse: () => null);
     return thisOption != null
         ? Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: FocusableButton(
               autofocus:
-                  widget.playerController.dataSource.endsWith(filenameEndsWith),
+                  widget.playerController.dataSource.contains(filenameEndsWith),
               width: MediaQuery.of(context).size.width / 4,
               height: 64,
               label: label,
               onTap: () {
                 widget.hideSettingsDisplay();
                 if (!widget.playerController.dataSource
-                    .endsWith(filenameEndsWith))
+                    .contains(filenameEndsWith))
                   widget.changeVideoQuality(thisOption);
               },
             ),
@@ -67,9 +67,9 @@ class SettingsButtonState extends State<SettingsButton> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _qualitySettingSelection('HD.mp4', '4K'),
-                _qualitySettingSelection('SD.mp4', '1080p'),
-                _qualitySettingSelection('Low.mp4', 'SD'),
+                _qualitySettingSelection('HD.', '4K'),
+                _qualitySettingSelection('SD.', '1080p'),
+                _qualitySettingSelection('Low.', 'SD'),
                 FocusableButton(
                   width: MediaQuery.of(context).size.width / 4,
                   height: 64,

@@ -51,6 +51,18 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   int _currentPage = 1;
 
+  int _seriesFilter;
+
+  final _seriesFilterFocusNode = FocusNode();
+  final _moviesFilterFocusNode = FocusNode();
+
+  Key _futureKey = UniqueKey();
+
+  void _seriesFilterOnTap(int option) => setState(() {
+        _futureKey = UniqueKey();
+        _seriesFilter = _seriesFilter == option ? null : option;
+      });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,11 +82,18 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 CustomAppBar(
                   label: widget.category.name,
                   closeButtonFocusNode: _closeButtonFocusNode,
+                  seriesFilter: true,
+                  seriesFilterFocusNode: _seriesFilterFocusNode,
+                  moviesFilterFocusNode: _moviesFilterFocusNode,
+                  seriesFilterOnTap: _seriesFilterOnTap,
+                  selectedSeriesOption: _seriesFilter,
                 ),
                 FutureBuilder(
+                  key: _futureKey,
                   future: VideosAPI.getVideosByCategory(
                     widget.category.name,
                     _currentPage,
+                    _seriesFilter,
                   ),
                   builder: (context, AsyncSnapshot<VideosResponse> videos) =>
                       videos.connectionState != ConnectionState.done ||
@@ -198,6 +217,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
     _closeButtonFocusNode.dispose();
     _goToTopButtonFocusNode.dispose();
     _nextPageButtonFocusNode.dispose();
+    _seriesFilterFocusNode.dispose();
+    _moviesFilterFocusNode.dispose();
     super.dispose();
   }
 }

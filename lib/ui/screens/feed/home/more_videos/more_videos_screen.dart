@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:ivrata_tv/global/button_keycodes.dart';
 import 'package:ivrata_tv/logic/api/models/videos_response_model.dart';
 import 'package:ivrata_tv/logic/api/videos.dart';
 import 'package:ivrata_tv/ui/shared/custom_appbar.dart';
@@ -21,6 +23,7 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
   final _goToTopButtonFocusNode = FocusNode();
   final _nextPageButtonFocusNode = FocusNode();
   final _searchButtonFocusNode = FocusNode();
+  final _textFieldFocusNode = FocusNode(canRequestFocus: false);
 
   void _scrollTo(double offset) => _scrollController.animateTo(offset,
       duration: const Duration(milliseconds: 300), curve: Curves.ease);
@@ -54,7 +57,22 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
 
   String _searchTerm;
 
-  void _searchButtonOnTap() => setState(() => _searchTerm = null);
+  void _searchButtonOnTap() {
+    setState(() => _searchTerm = null);
+    _textFieldFocusNode.requestFocus();
+  }
+
+  int _seriesFilter;
+
+  final _seriesFilterFocusNode = FocusNode();
+  final _moviesFilterFocusNode = FocusNode();
+
+  Key _futureKey = UniqueKey();
+
+  void _seriesFilterOnTap(int option) => setState(() {
+        if (_searchTerm != null) _futureKey = UniqueKey();
+        _seriesFilter = _seriesFilter == option ? null : option;
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +94,7 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
                   right: MediaQuery.of(context).size.width / 4,
                 ),
                 child: TextField(
+                  focusNode: _textFieldFocusNode,
                   cursorColor: Colors.black,
                   controller: _searchTermController,
                   style: const TextStyle(color: Colors.black),
@@ -96,13 +115,73 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
                     ),
                     prefixIcon: Icon(Icons.search, color: Colors.black),
                   ),
-                  onSubmitted: (_) {
-                    _closeButtonFocusNode.requestFocus();
-                    if (_searchTermController.text.length < 3)
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Please enter at least 3 characters')));
-                    else
+                  onSubmitted: (_) async {
+                    if (_searchTermController.text.length < 3) {
+                      _textFieldFocusNode.unfocus();
+                      showDialog(
+                        context: context,
+                        builder: (context) => Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: MediaQuery.of(context).size.width / 4,
+                            ),
+                            child: Material(
+                              elevation: 16,
+                              borderRadius: BorderRadius.circular(4),
+                              color: Colors.white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'You must enter at least 3 characters',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 16),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          FocusableButton(
+                                            width: 140,
+                                            height: 40,
+                                            label: 'CANCEL',
+                                            color: Colors.black26,
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                          const SizedBox(width: 12),
+                                          FocusableButton(
+                                            width: 140,
+                                            height: 40,
+                                            label: 'TRY AGAIN',
+                                            color: Colors.black26,
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              _textFieldFocusNode
+                                                  .requestFocus();
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
                       setState(() => _searchTerm = _searchTermController.text);
+                    }
                   },
                 ),
               ),
@@ -114,13 +193,23 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
               CustomAppBar(
                 label: 'More Videos',
                 closeButtonFocusNode: _closeButtonFocusNode,
+                seriesFilter: true,
+                seriesFilterFocusNode: _seriesFilterFocusNode,
+                moviesFilterFocusNode: _moviesFilterFocusNode,
+                seriesFilterOnTap: _seriesFilterOnTap,
+                selectedSeriesOption: _seriesFilter,
                 searchButton: _searchTerm != null,
                 searchButtonFocusNode: _searchButtonFocusNode,
                 searchOnTap: _searchButtonOnTap,
               ),
               if (_searchTerm != null)
                 FutureBuilder(
-                  future: VideosAPI.searchVideos(_searchTerm, _currentPage),
+                  key: _futureKey,
+                  future: VideosAPI.searchVideos(
+                    _searchTerm,
+                    _currentPage,
+                    _seriesFilter,
+                  ),
                   builder: (context, AsyncSnapshot<VideosResponse> videos) =>
                       videos.connectionState != ConnectionState.done ||
                               videos.hasError ||
@@ -243,6 +332,9 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
     _goToTopButtonFocusNode.dispose();
     _nextPageButtonFocusNode.dispose();
     _searchButtonFocusNode.dispose();
+    _seriesFilterFocusNode.dispose();
+    _moviesFilterFocusNode.dispose();
+    _textFieldFocusNode.dispose();
     super.dispose();
   }
 }
