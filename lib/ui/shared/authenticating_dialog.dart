@@ -37,6 +37,7 @@ class AuthenticatingDialog extends StatelessWidget {
                     FocusableButton(
                       width: 160,
                       height: 48,
+                      autofocus: true,
                       label: 'TRY AGAIN',
                       color: Colors.black26,
                       onTap: () => Navigator.pop(context, false),
