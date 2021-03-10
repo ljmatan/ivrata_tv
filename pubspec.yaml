@@ -1,0 +1,39 @@
+name: ivrata_tv
+description: iVrata streaming platform
+
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^0.12.2
+  intl: ^0.17.0
+  shared_preferences: ^2.0.3
+  video_player: ^2.0.0
+  flutter_vlc_player: ^5.0.4
+  sqflite: ^2.0.0+2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+    
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/images/categories/
+    
+  fonts:
+    - family: Rubik
+      fonts:
+        - asset: assets/fonts/Rubik.ttf
+    - family: Exo2
+      fonts:
+        - asset: assets/fonts/Exo2.ttf
