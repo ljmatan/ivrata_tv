@@ -40,52 +40,60 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200.withOpacity(0.3),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  for (var i = 0; i < 5; i++)
-                    StreamBuilder(
-                      stream: _currentPageController.stream,
-                      initialData: _currentPage,
-                      builder: (context, currentPage) => FocusableButton(
-                        width: MediaQuery.of(context).size.width / 6,
-                        height: 36,
-                        label: _labels.elementAt(i),
-                        onTap: () => _goToPage(i),
-                        textColor: currentPage.data == i ? Colors.black : null,
-                        fontWeight:
-                            currentPage.data == i ? FontWeight.bold : null,
-                        inverted: true,
+        SizedBox.expand(
+          child: AnimatedCrossFade(),
+        ),
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    for (var i = 0; i < 5; i++)
+                      StreamBuilder(
+                        stream: _currentPageController.stream,
+                        initialData: _currentPage,
+                        builder: (context, currentPage) => FocusableButton(
+                          autofocus: i == 0,
+                          width: MediaQuery.of(context).size.width / 6,
+                          height: 36,
+                          label: _labels.elementAt(i),
+                          onTap: () => _goToPage(i),
+                          color: Colors.transparent,
+                          textColor: currentPage.data == i
+                              ? Colors.white
+                              : Colors.white60,
+                          fontWeight:
+                              currentPage.data == i ? FontWeight.bold : null,
+                          inverted: true,
+                          borderRadius: 18,
+                        ),
                       ),
-                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                scrollDirection: Axis.vertical,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  HomePage(),
+                  TrendingPage(),
+                  CategoriesPage(
+                      screenWidth: MediaQuery.of(context).size.width),
+                  LivestreamsPage(),
+                  ProfilePage(),
                 ],
               ),
             ),
-          ),
-        ),
-        Expanded(
-          child: PageView(
-            controller: _pageController,
-            scrollDirection: Axis.vertical,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              HomePage(),
-              TrendingPage(),
-              CategoriesPage(screenWidth: MediaQuery.of(context).size.width),
-              LivestreamsPage(),
-              ProfilePage(),
-            ],
-          ),
+          ],
         ),
       ],
     );

@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:ivrata_tv/logic/api/models/videos_response_model.dart';
 import 'package:ivrata_tv/ui/screens/feed/home/more_videos/more_videos_screen.dart';
@@ -20,6 +21,8 @@ class _LatestEntryState extends State<LatestEntry>
   AnimationController _animationController;
   Animation<double> _scale;
 
+  List<String> _images;
+
   @override
   void initState() {
     super.initState();
@@ -28,9 +31,20 @@ class _LatestEntryState extends State<LatestEntry>
       duration: const Duration(milliseconds: 200),
     )..addListener(() => setState(() {}));
     _scale = Tween<double>(begin: 1.0, end: 1.05).animate(_animationController);
+    if (widget.video != null)
+      _images = [
+        widget.video.images.thumbsJpg,
+        if (!widget.video.images.poster.contains('notfound'))
+          widget.video.images.poster,
+        widget.video.images.thumbsJpg,
+        if (!widget.video.images.poster.contains('notfound'))
+          widget.video.images.poster,
+      ];
   }
 
   bool _isFocused = false;
+
+  final CarouselController _carouselController = CarouselController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,15 +53,14 @@ class _LatestEntryState extends State<LatestEntry>
         scale: _scale.value,
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            widget.index == 0 ? 6 : 12,
+            widget.index == 0 ? 12 : 6,
             6,
-            widget.index == 2 ? 6 : 12,
+            widget.index == 3 ? 12 : 6,
             6,
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: kElevationToShadow[2],
+              boxShadow: const [BoxShadow(blurRadius: 6)],
               color: Colors.white70,
             ),
             child: SizedBox(
@@ -56,15 +69,26 @@ class _LatestEntryState extends State<LatestEntry>
               child: Stack(
                 children: [
                   if (widget.video != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Hero(
-                        tag: widget.video.images.thumbsJpg,
-                        child: Image.network(
-                          widget.video.images.thumbsJpg,
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          fit: BoxFit.cover,
+                    Positioned.fill(
+                      child: CarouselSlider(
+                        carouselController: _carouselController,
+                        items: [
+                          for (var image in _images)
+                            SizedBox.expand(
+                              child: Image.network(
+                                image,
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                        ],
+                        options: CarouselOptions(
+                          viewportFraction: 1,
+                          enlargeCenterPage: true,
+                          autoPlayInterval: Duration(seconds: 1),
+                          aspectRatio: MediaQuery.of(context).size.width /
+                              MediaQuery.of(context).size.height,
                         ),
                       ),
                     ),
@@ -73,7 +97,6 @@ class _LatestEntryState extends State<LatestEntry>
                       duration: const Duration(milliseconds: 200),
                       decoration: BoxDecoration(
                         color: _isFocused ? Colors.transparent : Colors.black54,
-                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                   Center(
@@ -123,9 +146,13 @@ class _LatestEntryState extends State<LatestEntry>
               : VideoViewScreen(video: widget.video))),
       onFocusChange: (isFocused) {
         if (_isFocused != isFocused) _isFocused = isFocused;
-        isFocused
-            ? _animationController.forward()
-            : _animationController.reverse();
+        if (isFocused) {
+          _animationController.forward();
+          _carouselController?.startAutoPlay();
+        } else {
+          _animationController.reverse();
+          _carouselController?.stopAutoPlay();
+        }
       },
     );
   }

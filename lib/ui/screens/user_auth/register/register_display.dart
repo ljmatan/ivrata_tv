@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:ivrata_tv/data/user_data.dart';
 import 'package:ivrata_tv/logic/api/models/user_model.dart';
 import 'package:ivrata_tv/logic/api/auth.dart';
+import 'package:ivrata_tv/logic/api/social.dart';
 import 'package:ivrata_tv/ui/shared/authenticating_dialog.dart';
 import 'package:ivrata_tv/ui/shared/focusable_button.dart';
 
@@ -159,6 +160,10 @@ class _RegisterDisplayState extends State<RegisterDisplay> {
                                     final userData = UserData.fromJson(
                                         decodedUserInfo['response']['user']);
                                     await User.setInstance(userData, true);
+                                    await Social.getFavorites(
+                                      _usernameTextController.text,
+                                      _passwordTextController.text,
+                                    );
                                     Navigator.pop(context);
                                     Navigator.pop(context, true);
                                     if (widget.authSuccess != null)

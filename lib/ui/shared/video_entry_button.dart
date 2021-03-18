@@ -74,11 +74,11 @@ class _VideoEntryButtonState extends State<VideoEntryButton>
                       ),
                     ]
                   : null,
-              borderRadius: BorderRadius.circular(widget.borderRadius ?? 4),
+              borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(
-                widget.borderRadius ?? 4,
+                widget.borderRadius ?? 0,
               ),
               child: SizedBox(
                 width: widget.width,

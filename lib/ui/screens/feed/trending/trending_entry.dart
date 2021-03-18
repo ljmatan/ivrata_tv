@@ -71,7 +71,7 @@ class _TrendingEntryState extends State<TrendingEntry> {
                       opacity: _isFocused ? 0 : 0.6,
                       duration: _animationDuration,
                       child: DecoratedBox(
-                        decoration: BoxDecoration(color: Colors.white54),
+                        decoration: BoxDecoration(color: Colors.black54),
                         child: SizedBox(
                           width: MediaQuery.of(context).size.width,
                           height: MediaQuery.of(context).size.height,
@@ -101,6 +101,9 @@ class _TrendingEntryState extends State<TrendingEntry> {
                               child: Text(
                                 widget.video.title,
                                 textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             Row(
@@ -110,6 +113,7 @@ class _TrendingEntryState extends State<TrendingEntry> {
                                   widget.video.viewsCount.toString() + ' views',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w700,
+                                    color: Colors.white,
                                     fontSize: 13,
                                   ),
                                 ),

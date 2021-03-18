@@ -8,7 +8,7 @@ abstract class VideosAPI {
   static Future<VideosResponse> getLatest([int page]) async =>
       videosResponseFromJson((await http.get(
               'https://video.ivrata.com/plugin/API/get.json.php?APIName=video&sort[created]=desc&rowCount=' +
-                  (page == null ? '8' : '60&current=$page')))
+                  (page == null ? '12' : '60&current=$page')))
           .body);
 
   static Future<VideosResponse> getTrending() async =>

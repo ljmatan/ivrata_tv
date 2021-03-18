@@ -101,6 +101,8 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
+                    hintText: 'Search',
+                    hintStyle: const TextStyle(color: Colors.black54),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(color: Colors.grey),
@@ -134,43 +136,45 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      'You must enter at least 3 characters',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black,
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 20,
+                                        top: 10,
+                                      ),
+                                      child: Text(
+                                        'You must enter at least 3 characters',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 19,
+                                        ),
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 16),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          FocusableButton(
-                                            width: 140,
-                                            height: 40,
-                                            label: 'CANCEL',
-                                            color: Colors.black26,
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          const SizedBox(width: 12),
-                                          FocusableButton(
-                                            width: 140,
-                                            height: 40,
-                                            label: 'TRY AGAIN',
-                                            color: Colors.black26,
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                              _textFieldFocusNode
-                                                  .requestFocus();
-                                            },
-                                          ),
-                                        ],
-                                      ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        FocusableButton(
+                                          width: 140,
+                                          height: 40,
+                                          label: 'CANCEL',
+                                          color: Colors.black26,
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            Navigator.pop(context);
+                                          },
+                                        ),
+                                        const SizedBox(width: 12),
+                                        FocusableButton(
+                                          width: 140,
+                                          height: 40,
+                                          label: 'TRY AGAIN',
+                                          color: Colors.black26,
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            _textFieldFocusNode.requestFocus();
+                                          },
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -240,7 +244,7 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
                                   shrinkWrap: true,
                                   gridDelegate:
                                       SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 3,
+                                    crossAxisCount: 4,
                                     childAspectRatio: 16 / 10,
                                   ),
                                   itemCount: videos.data.response.rows.length,
@@ -249,9 +253,9 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
                                     height: MediaQuery.of(context).size.height,
                                     video: videos.data.response.rows[i],
                                     padding: EdgeInsets.fromLTRB(
-                                      (i + 1) % 3 == 0 ? 0 : 12,
+                                      i % 4 == 0 ? 12 : 6,
                                       6,
-                                      i % 3 == 0 ? 0 : 12,
+                                      (i + 1) % 4 == 0 ? 12 : 6,
                                       6,
                                     ),
                                   ),
@@ -270,7 +274,7 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
                                                   .size
                                                   .width /
                                               4,
-                                          height: 48,
+                                          height: 36,
                                           label: 'PREVIOUS PAGE',
                                           inverted: true,
                                           onTap: () =>
@@ -287,7 +291,7 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
                                                   .size
                                                   .width /
                                               4,
-                                          height: 48,
+                                          height: 36,
                                           label: 'GO TO TOP',
                                           inverted: true,
                                           onTap: () {
@@ -305,7 +309,7 @@ class _MoreVideosScreenState extends State<MoreVideosScreen> {
                                                   .size
                                                   .width /
                                               4,
-                                          height: 48,
+                                          height: 36,
                                           label: 'NEXT PAGE',
                                           inverted: true,
                                           onTap: () =>

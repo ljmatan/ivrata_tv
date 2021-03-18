@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ivrata_tv/data/user_data.dart';
 import 'package:ivrata_tv/logic/api/models/user_model.dart';
 import 'package:ivrata_tv/logic/api/auth.dart';
+import 'package:ivrata_tv/logic/api/social.dart';
 import 'package:ivrata_tv/ui/shared/authenticating_dialog.dart';
 import 'package:ivrata_tv/ui/shared/focusable_button.dart';
 
@@ -107,6 +108,10 @@ class _LoginDisplayState extends State<LoginDisplay> {
                                   final data = UserData.fromJson(decoded);
                                   print('Saving user data');
                                   await User.setInstance(data, true);
+                                  await Social.getFavorites(
+                                    _usernameTextController.text,
+                                    _passwordTextController.text,
+                                  );
                                   print('Saved user data');
                                   Navigator.pop(context);
                                   Navigator.pop(context, true);

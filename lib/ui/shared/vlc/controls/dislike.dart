@@ -29,17 +29,26 @@ class DislikeButtonState extends State<DislikeButton> {
   bool get liked => _liked;
   void setLiked(bool value) => setState(() => _liked = value);
 
-  @override
-  void initState() {
-    super.initState();
-    _liked = Prefs.instance.getBool('${widget.videoID}');
-  }
-
   bool _processing = false;
   bool get processing => _processing;
   void setProcessing(bool value, [bool updateOther = false]) {
     setState(() => _processing = value);
     if (updateOther) widget.likeButtonKey.currentState.setProcessing(value);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _liked = Prefs.instance.getBool('${widget.videoID}');
+    if (_liked == null && User.loggedIn)
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        setState(() => _processing = true);
+        _liked = await Social.isLiked(widget.videoID, 1);
+        if (widget.likeButtonKey.currentState.liked != null) {
+          widget.likeButtonKey.currentState.setProcessing(false);
+          setState(() => _processing = false);
+        }
+      });
   }
 
   Future<void> _action() async {

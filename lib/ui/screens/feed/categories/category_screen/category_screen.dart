@@ -125,7 +125,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                   shrinkWrap: true,
                                   gridDelegate:
                                       SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 3,
+                                    crossAxisCount: 4,
                                     childAspectRatio: 16 / 10,
                                   ),
                                   itemCount: videos.data.response.rows.length,
@@ -134,9 +134,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                     height: MediaQuery.of(context).size.height,
                                     video: videos.data.response.rows[i],
                                     padding: EdgeInsets.fromLTRB(
-                                      (i + 1) % 3 == 0 ? 0 : 12,
+                                      i % 4 == 0 ? 12 : 6,
                                       6,
-                                      i % 3 == 0 ? 0 : 12,
+                                      (i + 1) % 4 == 0 ? 12 : 6,
                                       6,
                                     ),
                                   ),
@@ -155,7 +155,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                                   .size
                                                   .width /
                                               4,
-                                          height: 48,
+                                          height: 36,
                                           label: 'PREVIOUS PAGE',
                                           inverted: true,
                                           onTap: () =>
@@ -172,7 +172,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                                   .size
                                                   .width /
                                               4,
-                                          height: 48,
+                                          height: 36,
                                           label: 'GO TO TOP',
                                           inverted: true,
                                           onTap: () {
@@ -190,7 +190,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                                   .size
                                                   .width /
                                               4,
-                                          height: 48,
+                                          height: 36,
                                           label: 'NEXT PAGE',
                                           inverted: true,
                                           onTap: () =>

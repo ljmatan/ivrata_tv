@@ -36,17 +36,11 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
 
   final _positionController = StreamController.broadcast();
 
-  bool _controlsVisible = false;
   final _controlsController = StreamController.broadcast();
 
   void _addVideoControllerListener(VlcPlayerController controller) =>
       controller.addListener(() {
         if (controller.value.isPlaying) {
-          if (!_controlsVisible &&
-              controller.value.position.inMilliseconds > 0) {
-            _controlsVisible = true;
-            _controlsController.add(true);
-          }
           _positionController.add(controller.value.position.inSeconds);
         }
       });
@@ -82,6 +76,7 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
   final _muteButtonFocusNode = FocusNode();
   final _sliderFocusNode = FocusNode();
   final _qualitySettingFocusNode = FocusNode();
+  final _closeButtonFocusNode = FocusNode();
 
   double _sliderValue = 0.0;
 
@@ -115,14 +110,39 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
     _videoQualities.removeWhere((element) => element == null);
     _videoPlayerController = VlcPlayerController.network(
       _videoQualities.elementAt(0) ?? '',
+      autoInitialize: false,
+      autoPlay: false,
     );
     _addVideoControllerListener(_videoPlayerController);
     _positionSubscription = _positionController.stream.listen((value) {
-      _currentPosition = value;
-      if (!_skipping) _sliderValue = value.toDouble();
+      if (value.runtimeType == int && value != 0) _currentPosition = value;
+      if (value.runtimeType == int && !_skipping)
+        _sliderValue = value.toDouble();
     });
     _skipSubscription =
         _skipValueController.stream.listen((value) => _sliderValue = value);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        // If initialisation is not delayed it doesn't work
+        Future.delayed(const Duration(milliseconds: 200), () async {
+          print('Controller initialisation start');
+          await Future.doWhile(() =>
+              _videoPlayerController.isReadyToInitialize == null ||
+              !_videoPlayerController.isReadyToInitialize);
+          print('Controller initialisation ready');
+          await _videoPlayerController.initialize();
+          print('Controller initialised');
+          _videoPlayerController.play();
+          _controlsController.add(true);
+          _playPauseButtonFocusNode.requestFocus();
+        });
+      } catch (e) {
+        print('VLC init error: $e');
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Video initialisation failed')));
+      }
+    });
   }
 
   void _showSettingsDisplay() {
@@ -143,34 +163,41 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
 
   void _changeVideoQuality(String newVideoURL) async {
     _controlsController.add(false);
+    _closeButtonFocusNode.requestFocus();
     if (_videoPlayerController != null) {
       setState(() {
         _playerKey = UniqueKey();
-        _controlsVisible = true;
         _currentVideoController =
             VlcPlayerController.network(newVideoURL, onInit: () {
           _addVideoControllerListener(_currentVideoController);
-          _currentVideoController.seekTo(Duration(seconds: currentPosition));
+          _controlsController.add(true);
+          _playPauseButtonFocusNode.requestFocus();
+          Future.delayed(
+              const Duration(milliseconds: 200),
+              () => _currentVideoController
+                  .seekTo(Duration(seconds: _sliderValue.floor())));
         });
-        _controlsController.add(true);
       });
-      await _videoPlayerController.stopRendererScanning();
-      await _videoPlayerController.dispose();
+      await _videoPlayerController?.stopRendererScanning();
+      await _videoPlayerController?.dispose();
       _videoPlayerController = null;
     } else {
       setState(() {
         _playerKey = UniqueKey();
-        _videoPlayerController.dispose();
-        _currentVideoController = null;
-        _controlsVisible = true;
         _videoPlayerController =
             VlcPlayerController.network(newVideoURL, onInit: () {
           _addVideoControllerListener(_videoPlayerController);
-          _currentVideoController.seekTo(Duration(seconds: currentPosition));
+          _controlsController.add(true);
+          _playPauseButtonFocusNode.requestFocus();
+          Future.delayed(
+              const Duration(milliseconds: 200),
+              () => _videoPlayerController
+                  .seekTo(Duration(seconds: _sliderValue.floor())));
         });
-        _controlsController.add(true);
       });
-      _addVideoControllerListener(_videoPlayerController);
+      await _currentVideoController?.stopRendererScanning();
+      await _currentVideoController?.dispose();
+      _videoPlayerController = null;
     }
   }
 
@@ -211,6 +238,7 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
                       top: 16,
                       right: 16,
                       child: FocusableIcon(
+                        focusNode: _closeButtonFocusNode,
                         autoFocus: true,
                         icon: Icons.close,
                         onTap: () => Navigator.pop(context),
@@ -336,19 +364,30 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
                                       stream: _skipping
                                           ? _skipValueController.stream
                                           : _positionController.stream,
-                                      initialData: _sliderValue,
-                                      builder: (context, position) => Slider(
-                                        activeColor:
-                                            Theme.of(context).primaryColor,
-                                        value: position.data /
+                                      initialData: currentPosition.toDouble(),
+                                      builder: (context, position) {
+                                        print(position.data);
+                                        print((_currentVideoController ??
+                                                _videoPlayerController)
+                                            .value
+                                            ?.duration
+                                            ?.inSeconds);
+                                        int duration =
                                             (_currentVideoController ??
                                                     _videoPlayerController)
                                                 .value
-                                                .duration
-                                                .inSeconds,
-                                        focusNode: _sliderFocusNode,
-                                        onChanged: (_) => null,
-                                      ),
+                                                ?.duration
+                                                ?.inSeconds;
+                                        if (duration == 0.0)
+                                          duration = 10000000000;
+                                        return Slider(
+                                          activeColor:
+                                              Theme.of(context).primaryColor,
+                                          value: position.data / duration,
+                                          focusNode: _sliderFocusNode,
+                                          onChanged: (_) => null,
+                                        );
+                                      },
                                     ),
                                   ),
                                 ],
@@ -379,7 +418,6 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
               key.data.toString().contains('keyCode: ${Buttons.right.code}');
           if (_sliderFocusNode.hasFocus && _leftKey ||
               _sliderFocusNode.hasFocus && _rightKey) {
-            if (!_skipping) setState(() => _skipping = true);
             if (_rightKey &&
                 _sliderValue + 1 <
                     (_currentVideoController ?? _videoPlayerController)
@@ -387,11 +425,10 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
                         .duration
                         .inSeconds) {
               _sliderValue++;
-              _skipValueController.add(_sliderValue);
             } else if (_leftKey && _sliderValue - 1 > 0) {
               _sliderValue--;
-              _skipValueController.add(_sliderValue);
             }
+            if (!_skipping) setState(() => _skipping = true);
             _skipValueController.add(_sliderValue);
             _setSkipConfirmationTimer();
           }
@@ -415,15 +452,6 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
           if (_sliderFocusNode.hasFocus) {
             if (key.data.toString().contains('keyCode: ${Buttons.up.code}'))
               _playPauseButtonFocusNode.requestFocus();
-            else if (key.data
-                .toString()
-                .contains('keyCode: ${Buttons.left.code}')) {
-              _positionController.add(_sliderValue - 60);
-            } else if (key.data
-                .toString()
-                .contains('keyCode: ${Buttons.right.code}')) {
-              _positionController.add(_sliderValue + 60);
-            }
           }
         }
       },
@@ -442,6 +470,7 @@ class _VLCVideoPlayerScreenState extends State<VLCVideoPlayerScreen> {
     _sliderFocusNode.dispose();
     _qualitySettingFocusNode.dispose();
     _keyboardListenerFocusNode.dispose();
+    _closeButtonFocusNode.dispose();
     _visibilityController.close();
     _visibilityTimer.cancel();
     _skipConfirmationTimer?.cancel();

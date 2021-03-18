@@ -85,20 +85,23 @@ class _ProfilePageState extends State<ProfilePage> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        FocusableButton(
-                          width: 120,
-                          height: 36,
-                          label: 'SAVED',
-                          onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      SavedVideosScreen())),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: FocusableButton(
+                            width: 120,
+                            height: 36,
+                            label: 'Favorites',
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (BuildContext context) =>
+                                        SavedVideosScreen())),
+                            borderRadius: 18,
+                          ),
                         ),
-                        const SizedBox(width: 12),
                         FocusableButton(
                           width: 120,
                           height: 36,
-                          label: 'LOGOUT',
+                          label: 'Logout',
                           onTap: () async {
                             showDialog(
                                 context: context,
@@ -110,8 +113,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             for (var key in Prefs.instance.getKeys())
                               await Prefs.instance.remove(key);
                             User.setInstance(null);
+                            Navigator.pop(context);
                             MainViewController.change(WelcomeScreen());
                           },
+                          borderRadius: 18,
                         ),
                       ],
                     ),
@@ -141,7 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             shrinkWrap: true,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
+                              crossAxisCount: 4,
                               childAspectRatio: 16 / 10,
                             ),
                             itemCount: videos.data.response.rows.length,
@@ -150,9 +155,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               height: MediaQuery.of(context).size.height,
                               video: videos.data.response.rows[i],
                               padding: EdgeInsets.fromLTRB(
-                                (i + 1) % 3 == 0 ? 0 : 12,
+                                i % 4 == 0 ? 12 : 6,
                                 6,
-                                i % 3 == 0 ? 0 : 12,
+                                (i + 1) % 4 == 0 ? 12 : 6,
                                 6,
                               ),
                             ),

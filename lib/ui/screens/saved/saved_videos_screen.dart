@@ -90,7 +90,7 @@ class _SavedVideosScreenState extends State<SavedVideosScreen> {
                               shrinkWrap: true,
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
+                                crossAxisCount: 4,
                                 childAspectRatio: 16 / 10,
                               ),
                               itemCount: videos.data.length,
@@ -100,9 +100,9 @@ class _SavedVideosScreenState extends State<SavedVideosScreen> {
                                 video: VideoData.fromJson(jsonDecode(
                                     videos.data[i]['savedVideoEncoded'])),
                                 padding: EdgeInsets.fromLTRB(
-                                  (i + 1) % 3 == 0 ? 0 : 12,
+                                  i % 4 == 0 ? 12 : 6,
                                   6,
-                                  i % 3 == 0 ? 0 : 12,
+                                  (i + 1) % 4 == 0 ? 12 : 6,
                                   6,
                                 ),
                               ),

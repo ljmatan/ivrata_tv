@@ -27,25 +27,31 @@ class HomePage extends StatelessWidget {
                           children: [
                             Expanded(
                               child: LatestEntry(
-                                video: videos.data.response.rows[i * 3],
+                                video: videos.data.response.rows[i * 4],
                                 index: 0,
                               ),
                             ),
                             Expanded(
                               child: LatestEntry(
-                                video: videos.data.response.rows[i * 3 + 1],
+                                video: videos.data.response.rows[i * 4 + 1],
                                 index: 1,
                               ),
                             ),
                             Expanded(
                               child: LatestEntry(
-                                video: i * 3 + 2 < 8
-                                    ? videos.data.response.rows[i * 3 + 2]
-                                    : null,
+                                video: videos.data.response.rows[i * 4 + 2],
                                 index: 2,
                               ),
                             ),
-                          ].reversed.toList(),
+                            Expanded(
+                              child: LatestEntry(
+                                video: i != 0
+                                    ? videos.data.response.rows[i * 4 + 3]
+                                    : null,
+                                index: 3,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     const SizedBox(height: 6),

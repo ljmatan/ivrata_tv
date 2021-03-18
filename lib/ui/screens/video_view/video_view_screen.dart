@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:ivrata_tv/data/user_data.dart';
 import 'package:ivrata_tv/logic/api/models/videos_response_model.dart';
+import 'package:ivrata_tv/logic/api/social.dart';
 import 'package:ivrata_tv/logic/cache/prefs.dart';
 import 'package:ivrata_tv/logic/storage/local.dart';
 import 'package:ivrata_tv/ui/screens/channel_view/channel_view_screen.dart';
@@ -52,6 +54,36 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
 
   bool _saved;
   Future<void> _save() async {
+    if (User.loggedIn) {
+      try {
+        if (!_saved) {
+          await Social.favorite(widget.video.id);
+          await DB.instance.insert(
+            'Saved',
+            {
+              'videoID': widget.video.id,
+              'savedVideoEncoded': jsonEncode(widget.video.toJson()),
+            },
+          );
+        } else {
+          await DB.instance.delete(
+            'Saved',
+            where: 'videoID = ?',
+            whereArgs: [widget.video.id],
+          );
+        }
+        setState(() => _saved = !_saved);
+        await Prefs.instance.setBool('${widget.video.id} saved', _saved);
+      } catch (e) {
+        print('$e');
+      }
+    } else
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('You must be logged in to do that')));
+  }
+
+  bool _subscribed;
+  Future<void> _subscribe() async {
     if (_saved)
       await DB.instance.insert(
         'Saved',
@@ -67,6 +99,9 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
   void initState() {
     super.initState();
     _saved = Prefs.instance.getBool('${widget.video.id} saved') ?? false;
+    _subscribed =
+        Prefs.instance.getBool('${widget.video.channelName} subscribed') ??
+            false;
     _videoQualities = {
       widget.video.videos.mp4.hd,
       widget.video.videos.mp4.sd,
@@ -222,13 +257,27 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              FocusableButton(
+                                width: 160,
+                                height: 36,
+                                label: 'Subscribe',
+                                inverted: false,
+                                color: Colors.red.shade300.withOpacity(0.6),
+                                onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            ChannelViewScreen(
+                                                channelName: widget.video.name,
+                                                channel:
+                                                    widget.video.channelName))),
+                              ),
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
                                 child: FocusableButton(
                                   width: 160,
                                   height: 36,
                                   label: 'Channel',
-                                  inverted: true,
                                   onTap: () => Navigator.of(context).push(
                                       MaterialPageRoute(
                                           builder: (BuildContext context) =>
@@ -239,17 +288,12 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
                                                       .video.channelName))),
                                 ),
                               ),
-                              StatefulBuilder(
-                                builder: (context, newState) => FocusableButton(
-                                  width: 160,
-                                  height: 36,
-                                  label: _saved ? 'Saved' : 'Save',
-                                  color: _saved ? Colors.green : null,
-                                  onTap: () async {
-                                    newState(() => _saved = !_saved);
-                                    await _save();
-                                  },
-                                ),
+                              FocusableButton(
+                                width: 160,
+                                height: 36,
+                                label: _saved ? 'Favorited' : 'Favorite',
+                                color: _saved ? Colors.green : null,
+                                onTap: () async => await _save(),
                               ),
                               /*StatefulBuilder(
                                 builder: (context, newState) => FocusableButton(
